@@ -4,19 +4,31 @@ class Bingo:
         # print(self.bingosequence)
         self.bingoboards = []
         self.numberindex = 0
+        self.wonboards = []
     
     def addbingoboard(self, board):
         # print(board)
         self.bingoboards.append(board)
         
     def callnumber(self):
+        # initialize
+        if self.wonboards == []:
+            self.wonboards = [0] * len(self.bingoboards)
+
         callednumber = self.bingosequence[self.numberindex]
         print(callednumber)
-        for b in self.bingoboards:
+        for bindex in range(len(self.bingoboards)):
+            b = self.bingoboards[bindex]
             updatedcoords = self.__markboard__(b, callednumber)
             # print(updatedcoords)
-            if self.__checkboard__(b, updatedcoords):
-                return self.__unmarkedsum__(b) * callednumber
+            if self.wonboards[bindex] == 0 and self.__checkboard__(b, updatedcoords):
+                # problem 1
+                # return self.__unmarkedsum__(b) * callednumber
+                # problem 2
+                self.wonboards[bindex] = self.__unmarkedsum__(b) * callednumber
+                print(self.wonboards)
+                if all(n > 0 for n in self.wonboards):
+                    return self.wonboards[bindex]
         print('all boards marked, calling next number')
         self.numberindex += 1
         return 0
@@ -73,7 +85,7 @@ def readandparseinput(filename):
                 boardrows = []
         return bingo
 
-# problem 1
+# problem 2
 bingo = readandparseinput('input.txt')
 solution = 0
 while solution == 0:
@@ -81,5 +93,3 @@ while solution == 0:
 else:
     print(solution)
 
-# problem 2
-# TODO
