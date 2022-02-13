@@ -26,7 +26,7 @@ def readInput(fileName):
     return inputFile.readlines()
 
 
-input = readInput('input.txt')
+input = readInput('test.txt')
 
 
 def parseinput(input):
@@ -56,6 +56,27 @@ def determine_number_simple(signal):
     if is_seven(signal): return 7
     if is_eight(signal): return 8
     return -1
+
+def minus(first, second):
+    result = []
+    for c in first:
+        if c not in second:
+            result.append(c)
+    return ''.join(sorted(result))
+
+def minus_known_signals(num, known_signals):
+    result = []
+    for c in num:
+        if c not in known_signals:
+            result.append(c)
+    return result
+
+def intersection(first, second):
+    result = []
+    for c in first:
+        if c in second:
+            result.append(c)
+    return ''.join(sorted(result))
 
 def problem1():
     inputarray = parseinput(input)
@@ -91,8 +112,16 @@ def problem2():
         char_pos_mapping[2] = digit_string_mapping[1][0]
         char_pos_mapping[5] = digit_string_mapping[1][1]
         # determine top signal (7 - 1)
-        # digit_string_mapping[7] = 
+        char_pos_mapping[0] = minus(digit_string_mapping[7], digit_string_mapping[1])
+        # find 3 by process of elimination (signal length = 5) 
+        # then find bottom signal
+        for num in line[0]:
+            if (len(num) == 5):
+                unknown_signals_in_five_length_num = minus_known_signals(minus(num, digit_string_mapping[4]), char_pos_mapping)
+                if (len(unknown_signals_in_five_length_num) == 1):
+                    char_pos_mapping[6] = unknown_signals_in_five_length_num[0]
 
+                    break
 
         # FINALLY loop over 4 digits, create number, etc.
         str_num = ''
