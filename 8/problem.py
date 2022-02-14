@@ -3,30 +3,12 @@
 #    d(3)
 # e(4)     f(5)
 #    g(6)   
-
-# find 1, 4, 7, and 8
-# c, f (which is which still unknown)
-
-# determine top signal (7 chars - 1 chars)
-# a
-
-# determine middle signal (duplicate between 3 chars and 4 chars, minus c and f)
-# d
-
-# determine bottom signal (3 chars, the one we don't know)
-# g
-
-# determine bottom left signal (2 chars - the ones we know)
-# e
-
-# determine upper left signal (8 chars - the ones we know)
-# b
 def readInput(fileName):
     inputFile = open(fileName, 'r')
     return inputFile.readlines()
 
 
-input = readInput('test.txt')
+input = readInput('input.txt')
 
 
 def parseinput(input):
@@ -100,42 +82,84 @@ def problem2():
     
     # array of chars that map to signal position (index is the position (a = 0, b = 1, etc.))
     # -1 indicates the char is not deduced yet
-    char_pos_mapping = [-1] * 10
+    char_pos_mapping = [-1] * 7
 
     # loop over every line of input
     for line in inputarray:
+        
         # loop through to find simple numbers first
         for signal_chars in line[0]:
             num = determine_number_simple(signal_chars)
             if (num > -1): digit_string_mapping[num] = ''.join(sorted(signal_chars))
-        # upper and lower right signals
+        
+        # upper and lower right signals, could be switched but doesn't matter
         char_pos_mapping[2] = digit_string_mapping[1][0]
         char_pos_mapping[5] = digit_string_mapping[1][1]
+        
         # determine top signal (7 - 1)
         char_pos_mapping[0] = minus(digit_string_mapping[7], digit_string_mapping[1])
-        # find 3 by process of elimination (signal length = 5) 
-        # then find bottom signal
+        
+        # scan length 5 numbers (2, 3, 5)
         for num in line[0]:
+            num = ''.join(sorted(num))
+            
             if (len(num) == 5):
-                unknown_signals_in_five_length_num = minus_known_signals(minus(num, digit_string_mapping[4]), char_pos_mapping)
-                if (len(unknown_signals_in_five_length_num) == 1):
-                    char_pos_mapping[6] = unknown_signals_in_five_length_num[0]
+                if (digit_string_mapping[1][0] in num and digit_string_mapping[1][1] in num):
+                    # it's 3?
+                    the_mapping = minus_known_signals(minus(num, digit_string_mapping[4]), char_pos_mapping)
+                    if (len(the_mapping) == 1):
+                        digit_string_mapping[3] = num
+                        char_pos_mapping[6] = the_mapping[0]
+                
+        # scan them again now that we determined 3!
+        for num in line[0]:
+            num = ''.join(sorted(num))
+            if (len(num) == 5 and digit_string_mapping[3] != -1):
+                remaining_signal = minus(num, digit_string_mapping[3])
+                if (len(remaining_signal) == 1):
+                    if (remaining_signal in digit_string_mapping[4]):
+                        # it's 5
+                        digit_string_mapping[5] = num
+                        char_pos_mapping[1] = remaining_signal
+                    else:
+                        # it's 2
+                        digit_string_mapping[2] = num
+                        char_pos_mapping[4] = remaining_signal
 
+        # scan length 6 numbers (0, 6, 9), looking for 6
+        for num in line[0]:
+            num = ''.join(sorted(num))
+            if (len(num) == 6):
+                if (char_pos_mapping[4] != -1 and char_pos_mapping[4] in num and char_pos_mapping[2] != -1 and char_pos_mapping[2] not in num):
+                    # it's 6?
+                    the_mapping = minus_known_signals(num, char_pos_mapping)
+                    if (len(the_mapping) == 1):
+                        digit_string_mapping[6] = num
+                        char_pos_mapping[3] = the_mapping[0]
                     break
+
+        # all signals determined, set 0 and 9
+        digit_string_mapping[0] = ''.join(sorted(char_pos_mapping[0] + char_pos_mapping[1] + char_pos_mapping[2] + char_pos_mapping[4] + char_pos_mapping[5] + char_pos_mapping[6]))
+        digit_string_mapping[9] = ''.join(sorted(char_pos_mapping[0] + char_pos_mapping[1] + char_pos_mapping[2] + char_pos_mapping[3] + char_pos_mapping[5] + char_pos_mapping[6]))
 
         # FINALLY loop over 4 digits, create number, etc.
         str_num = ''
         for digit in line[1]:
+            # if (digit == ''): continue
+            digit = ''.join(sorted(digit))
             i = 0
             while i < len(digit_string_mapping):
                 if digit_string_mapping[i] == digit:
                     str_num += str(i)
                 i += 1
-        # print(str_num)
+        if (str_num != ''):
+            running_total = running_total + int(str_num)
+            # print(str_num)
+            # print(running_total)
 
-    print(char_pos_mapping)
-    print(digit_string_mapping)
-    return
+    # print(char_pos_mapping)
+    # print(digit_string_mapping)
+    return running_total
 
 print(problem1())
 print(problem2())
